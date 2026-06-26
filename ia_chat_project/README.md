@@ -54,6 +54,7 @@ No Windows, você pode executar o script abaixo dentro da pasta do projeto:
 ```
 
 Cole sua chave quando o terminal pedir. O script salva as variáveis `OPENROUTER_API_KEY` e `OPENROUTER_MODEL` no usuário do Windows.
+Ele também cria um arquivo local `.env` dentro do projeto, para o Flask encontrar a chave mesmo se o PowerShell ainda não tiver recarregado as variáveis do Windows.
 
 Se preferir configurar manualmente:
 
@@ -125,6 +126,19 @@ Esse prompt é enviado junto com cada pergunta do usuário. Assim, o modelo rece
 ## Tratamento de erros
 
 O projeto valida mensagens vazias, verifica se a variável `OPENROUTER_API_KEY` foi configurada e trata falhas de comunicação com a API. Quando ocorre algum problema, o backend retorna uma mensagem de erro em JSON e o frontend exibe essa mensagem no chat.
+
+## Melhorias implementadas
+
+- Historico de conversa por sessao, permitindo que a IA use mensagens anteriores como contexto.
+- Escolha da linguagem de programacao, como Java, Python, JavaScript, SQL e C#.
+- Selecao de categoria da duvida, como Logica, APIs, Banco de Dados, Debug, Testes e Boas praticas.
+- Respostas com blocos de codigo formatados e botao para copiar codigo.
+- Tratamento de erros mais especifico para chave invalida, limite da API, timeout e falha de conexao.
+- Salvamento das mensagens em banco SQLite local.
+- Botao para limpar a conversa.
+- Alternancia entre tema escuro e tema claro.
+- Upload de arquivos de codigo para analise pela IA.
+- Prompt de sistema mais detalhado, orientando a IA a responder como mentora tecnica de programacao.
 
 ## Possíveis dificuldades encontradas
 
