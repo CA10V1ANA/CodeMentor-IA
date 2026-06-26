@@ -1,0 +1,211 @@
+:root {
+    color-scheme: dark;
+    --bg: #10141f;
+    --panel: #181f2e;
+    --panel-strong: #202a3d;
+    --text: #eef3ff;
+    --muted: #9aa8c2;
+    --accent: #38bdf8;
+    --accent-strong: #0ea5e9;
+    --user: #2563eb;
+    --assistant: #263348;
+    --danger: #f87171;
+    --border: #344158;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 28%),
+        linear-gradient(135deg, #10141f, #151927 45%, #0f172a);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.chat-shell {
+    width: min(920px, 100%);
+    height: min(760px, calc(100vh - 48px));
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(24, 31, 46, 0.96);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    background: var(--panel-strong);
+    border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+    margin: 0 0 4px;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 750;
+}
+
+.status {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 999px;
+    color: #d7f4ff;
+    background: rgba(14, 165, 233, 0.12);
+    font-size: 0.82rem;
+}
+
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 22px;
+    overflow-y: auto;
+    background: var(--panel);
+}
+
+.message {
+    width: fit-content;
+    max-width: min(76%, 680px);
+    padding: 12px 14px;
+    border-radius: 8px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 0.96rem;
+}
+
+.message.user {
+    align-self: flex-end;
+    color: white;
+    background: var(--user);
+}
+
+.message.assistant {
+    align-self: flex-start;
+    background: var(--assistant);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.message.error {
+    align-self: flex-start;
+    color: #ffe1e1;
+    background: rgba(248, 113, 113, 0.14);
+    border: 1px solid rgba(248, 113, 113, 0.34);
+}
+
+.message.loading {
+    color: var(--muted);
+    font-style: italic;
+}
+
+.chat-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 16px;
+    background: var(--panel-strong);
+    border-top: 1px solid var(--border);
+}
+
+textarea {
+    width: 100%;
+    max-height: 150px;
+    resize: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    padding: 13px 14px;
+    color: var(--text);
+    background: #111827;
+    font: inherit;
+    line-height: 1.4;
+}
+
+textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+}
+
+button {
+    min-width: 96px;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 18px;
+    color: white;
+    background: var(--accent-strong);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0284c7;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 0;
+    }
+
+    .chat-shell {
+        height: 100vh;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .chat-header {
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .message {
+        max-width: 92%;
+    }
+
+    .chat-form {
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        min-height: 44px;
+    }
+}

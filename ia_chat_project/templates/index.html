@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeMentor IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="chat-shell" aria-label="Chat CodeMentor IA">
+        <header class="chat-header">
+            <div>
+                <p class="eyebrow">Engenharia de Inteligência Artificial</p>
+                <h1>CodeMentor IA</h1>
+            </div>
+            <span class="status">Online</span>
+        </header>
+
+        <section class="chat-messages" id="chat-messages" aria-live="polite">
+            <article class="message assistant">
+                Olá! Sou uma IA especialista em programação e desenvolvimento de software. Posso ajudar com lógica, Python, JavaScript, APIs, banco de dados, testes, arquitetura e depuração de código.
+            </article>
+        </section>
+
+        <form class="chat-form" id="chat-form">
+            <label class="sr-only" for="message-input">Mensagem</label>
+            <textarea
+                id="message-input"
+                name="message"
+                rows="1"
+                placeholder="Digite sua dúvida de programação..."
+                autocomplete="off"
+                required
+            ></textarea>
+            <button type="submit" id="send-button">Enviar</button>
+        </form>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
