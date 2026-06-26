@@ -137,7 +137,7 @@ O projeto valida mensagens vazias, verifica se a variável `OPENROUTER_API_KEY` 
 - Salvamento das mensagens em banco SQLite local.
 - Botao para limpar a conversa.
 - Alternancia entre tema escuro e tema claro.
-- Upload de arquivos de codigo para analise pela IA.
+- Upload de arquivos de codigo e imagens para analise pela IA.
 - Prompt de sistema mais detalhado, orientando a IA a responder como mentora tecnica de programacao.
 
 ## Possíveis dificuldades encontradas

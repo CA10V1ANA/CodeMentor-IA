@@ -12,6 +12,12 @@ const welcomePanel = document.querySelector("#welcome-panel");
 const suggestionButtons = document.querySelectorAll("[data-suggestion]");
 const historyList = document.querySelector("#history-list");
 const newChatButton = document.querySelector("#new-chat-button");
+const toolsButton = document.querySelector("#tools-button");
+const toolsPopover = document.querySelector("#tools-popover");
+const historyToggle = document.querySelector("#history-toggle");
+const historySidebar = document.querySelector("#history-sidebar");
+const historyBackdrop = document.querySelector("#history-backdrop");
+const historyCloseButton = document.querySelector("#history-close-button");
 
 const SESSION_KEY = "codementor_session_id";
 const THEME_KEY = "codementor_theme";
@@ -203,6 +209,25 @@ function addUserMessage(text, meta) {
     }
 }
 
+function addUserMessageWithAttachment(text, meta, attachment) {
+    const message = addMessage(text, "user");
+
+    if (meta) {
+        const metaElement = document.createElement("div");
+        metaElement.className = "message-meta";
+        metaElement.textContent = meta;
+        message.prepend(metaElement);
+    }
+
+    if (attachment?.kind === "image") {
+        const image = document.createElement("img");
+        image.className = "attachment-preview";
+        image.src = attachment.content;
+        image.alt = attachment.name;
+        message.appendChild(image);
+    }
+}
+
 function addLoadingMessage() {
     const message = document.createElement("article");
     message.className = "message assistant loading typing";
@@ -224,9 +249,34 @@ async function readSelectedFile() {
         return null;
     }
 
+    const isImage = file.type.startsWith("image/");
+    const maxSize = isImage ? 4 * 1024 * 1024 : 512 * 1024;
+
+    if (file.size > maxSize) {
+        throw new Error(isImage ? "A imagem deve ter ate 4 MB." : "O arquivo de texto deve ter ate 512 KB.");
+    }
+
+    if (isImage) {
+        const content = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("Nao foi possivel ler a imagem."));
+            reader.readAsDataURL(file);
+        });
+
+        return {
+            kind: "image",
+            name: file.name,
+            type: file.type,
+            content,
+        };
+    }
+
     const content = await file.text();
     return {
+        kind: "code",
         name: file.name,
+        type: file.type || "text/plain",
         content: content.slice(0, 12000),
     };
 }
@@ -237,23 +287,31 @@ function setBusy(isBusy) {
     languageSelect.disabled = isBusy;
     categorySelect.disabled = isBusy;
     codeFileInput.disabled = isBusy;
+    toolsButton.disabled = isBusy;
 }
 
 async function sendMessage(event) {
     event.preventDefault();
 
     const text = messageInput.value.trim();
-    const attachment = await readSelectedFile();
+    let attachment = null;
+
+    try {
+        attachment = await readSelectedFile();
+    } catch (error) {
+        addMessage(error.message, "error");
+        return;
+    }
 
     if (!text && !attachment) {
         return;
     }
 
     const shownText = attachment
-        ? `${text || "Analise este arquivo."}\n\nArquivo anexado: ${attachment.name}`
+        ? `${text || (attachment.kind === "image" ? "Analise esta imagem." : "Analise este arquivo.")}\n\nArquivo anexado: ${attachment.name}`
         : text;
 
-    addUserMessage(shownText, `${languageSelect.value} - ${categorySelect.value}`);
+    addUserMessageWithAttachment(shownText, `${languageSelect.value} - ${categorySelect.value}`, attachment);
     messageInput.value = "";
     codeFileInput.value = "";
     fileName.textContent = "Nenhum arquivo";
@@ -382,6 +440,7 @@ async function loadConversation(selectedSessionId) {
     });
 
     loadSessions();
+    closeHistoryPanel();
 }
 
 function startNewConversation() {
@@ -392,6 +451,7 @@ function startNewConversation() {
     fileName.textContent = "Nenhum arquivo";
     createWelcomePanel();
     loadSessions();
+    closeHistoryPanel();
     messageInput.focus();
 }
 
@@ -403,6 +463,39 @@ function bindSuggestionButtons() {
             messageInput.focus();
         });
     });
+}
+
+function closeToolsPopover() {
+    toolsPopover.hidden = true;
+    toolsButton.classList.remove("active");
+}
+
+function toggleToolsPopover() {
+    toolsPopover.hidden = !toolsPopover.hidden;
+    toolsButton.classList.toggle("active", !toolsPopover.hidden);
+}
+
+function openHistoryPanel() {
+    historySidebar.classList.add("open");
+    historySidebar.setAttribute("aria-hidden", "false");
+    historyBackdrop.hidden = false;
+    historyToggle.classList.add("active");
+}
+
+function closeHistoryPanel() {
+    historySidebar.classList.remove("open");
+    historySidebar.setAttribute("aria-hidden", "true");
+    historyBackdrop.hidden = true;
+    historyToggle.classList.remove("active");
+}
+
+function toggleHistoryPanel() {
+    if (historySidebar.classList.contains("open")) {
+        closeHistoryPanel();
+        return;
+    }
+
+    openHistoryPanel();
 }
 
 messageInput.addEventListener("input", resizeInput);
@@ -421,10 +514,30 @@ themeButton.addEventListener("click", () => {
 
 clearButton.addEventListener("click", clearConversation);
 chatForm.addEventListener("submit", sendMessage);
+toolsButton.addEventListener("click", toggleToolsPopover);
+historyToggle.addEventListener("click", toggleHistoryPanel);
+historyBackdrop.addEventListener("click", closeHistoryPanel);
+historyCloseButton.addEventListener("click", closeHistoryPanel);
+
+document.addEventListener("click", (event) => {
+    if (toolsPopover.hidden) {
+        return;
+    }
+
+    if (!event.target.closest(".composer-tools")) {
+        closeToolsPopover();
+    }
+});
 
 codeFileInput.addEventListener("change", () => {
     const file = codeFileInput.files[0];
-    fileName.textContent = file ? file.name : "Nenhum arquivo";
+    if (!file) {
+        fileName.textContent = "Nenhum arquivo";
+        return;
+    }
+
+    const prefix = file.type.startsWith("image/") ? "Imagem: " : "Arquivo: ";
+    fileName.textContent = `${prefix}${file.name}`;
 });
 
 newChatButton.addEventListener("click", startNewConversation);

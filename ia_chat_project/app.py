@@ -172,7 +172,9 @@ SYSTEM_PROMPT = (
     "de codigo quando isso ajudar. Quando receber codigo do usuario, analise "
     "possiveis erros, explique a causa, sugira melhoria e mostre uma versao "
     "corrigida quando adequado. Priorize boas praticas, legibilidade, testes, "
-    "seguranca, desempenho e arquitetura. Se a pergunta estiver fora da area "
+    "seguranca, desempenho e arquitetura. Quando receber imagem, print ou foto, "
+    "analise o conteudo visual e relacione com programacao, interface, erro, "
+    "codigo ou contexto tecnico mostrado. Se a pergunta estiver fora da area "
     "de programacao, responda brevemente e redirecione para temas de software."
 )
 
@@ -192,7 +194,7 @@ def chat():
     attachment = data.get("attachment") or {}
 
     if not user_message and not attachment.get("content"):
-        return jsonify({"error": "Digite uma pergunta ou envie um arquivo de codigo."}), 400
+        return jsonify({"error": "Digite uma pergunta ou envie um arquivo."}), 400
 
     if not OPENROUTER_API_KEY:
         return (
@@ -214,21 +216,42 @@ def chat():
     )
 
     final_user_message = user_message
+    current_user_content = final_user_message
+
     if attachment.get("content"):
         file_name = attachment.get("name", "arquivo_enviado")
         file_content = attachment.get("content", "")
-        final_user_message = (
-            f"{user_message}\n\n"
-            f"Arquivo enviado: {file_name}\n"
-            "Analise o codigo abaixo:\n"
-            f"```{language.lower()}\n{file_content}\n```"
-        ).strip()
+        file_kind = attachment.get("kind", "code")
+
+        if file_kind == "image":
+            final_user_message = (
+                f"{user_message or 'Analise a imagem enviada.'}\n\n"
+                f"Imagem enviada: {file_name}"
+            ).strip()
+            current_user_content = [
+                {
+                    "type": "text",
+                    "text": (
+                        f"{final_user_message}\n"
+                        "Descreva o que aparece na imagem e ajude com a duvida do usuario."
+                    ),
+                },
+                {"type": "image_url", "image_url": {"url": file_content}},
+            ]
+        else:
+            final_user_message = (
+                f"{user_message}\n\n"
+                f"Arquivo enviado: {file_name}\n"
+                "Analise o codigo abaixo:\n"
+                f"```{language.lower()}\n{file_content}\n```"
+            ).strip()
+            current_user_content = final_user_message
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "system", "content": context_prompt},
         *get_recent_history(session_id),
-        {"role": "user", "content": final_user_message},
+        {"role": "user", "content": current_user_content},
     ]
 
     headers = {
