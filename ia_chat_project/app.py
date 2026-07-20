@@ -10,7 +10,8 @@ from flask import Flask, jsonify, render_template, request
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(__file__)
-DB_PATH = os.path.join(BASE_DIR, "codementor_history.db")
+DB_DIR = "/tmp" if os.environ.get("VERCEL") else BASE_DIR
+DB_PATH = os.path.join(DB_DIR, "codementor_history.db")
 
 
 def load_local_env():
@@ -257,7 +258,7 @@ def chat():
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "http://127.0.0.1:5000",
+        "HTTP-Referer": request.host_url.rstrip("/"),
         "X-Title": "CodeMentor IA",
     }
 
